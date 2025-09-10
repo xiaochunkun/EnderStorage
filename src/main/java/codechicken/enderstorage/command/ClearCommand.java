@@ -1,3 +1,24 @@
+/**
+ * 末影存储清理命令类（已废弃）
+ * 
+ * 这是旧版本的清理命令实现，目前已被注释掉。
+ * 提供清理用户末影存储的功能，支持按类型、频率、玩家等条件筛选。
+ * 
+ * 原功能包括：
+ * - 清理指定类型的存储（物品/液体/全部）
+ * - 按频率筛选要清理的存储
+ * - 支持清理特定玩家或全局存储
+ * - 批量清理操作
+ * - 详细的命令帮助和错误提示
+ * 
+ * 命令语法：/EnderStorage clear [item|liquid|*] [freq|*] <player>
+ * 
+ * TODO: 需要使用新的命令系统重新实现这些功能
+ * 
+ * @author covers1624
+ * @since 18/01/2017
+ * @deprecated 使用旧版命令API，需要重构
+ */
 //package codechicken.enderstorage.command;
 //
 //import codechicken.enderstorage.api.AbstractEnderStorage;

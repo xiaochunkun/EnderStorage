@@ -1,3 +1,20 @@
+/**
+ * 末影存储JEI插件类（已废弃）
+ * 
+ * 这是与JEI（Just Enough Items）模组集成的插件实现，目前已被注释掉。
+ * 原本用于在JEI界面中显示末影存储的配方信息，特别是重新着色配方。
+ * 
+ * 原功能包括：
+ * - 注册末影存储的自定义配方到JEI
+ * - 提供合成网格助手用于配方显示
+ * - 处理重新着色配方的JEI集成
+ * 
+ * TODO: 需要根据新版本的JEI API重新实现这个插件
+ * 
+ * @author covers1624
+ * @since 8/07/2017
+ * @deprecated 使用旧版JEI API，需要重构
+ */
 //package codechicken.enderstorage.plugin.jei;
 //
 //import codechicken.enderstorage.recipe.Factories;

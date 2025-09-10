@@ -1,3 +1,21 @@
+/**
+ * 末影存储主命令类（已废弃）
+ * 
+ * 这是旧版本的命令系统实现，目前已被注释掉。
+ * 在新版本的Minecraft中，命令系统已经重构，需要使用新的命令API。
+ * 
+ * 原功能包括：
+ * - 提供帮助命令显示使用说明
+ * - 集成清理命令用于管理末影存储
+ * - 支持多种命令别名（ES、es、EnderStorage、enderstorage）
+ * - 提供颜色、频率、有效存储等帮助页面
+ * 
+ * TODO: 需要使用新的命令系统重新实现这些功能
+ * 
+ * @author covers1624
+ * @since 18/01/2017
+ * @deprecated 使用旧版命令API，需要重构
+ */
 //package codechicken.enderstorage.command;
 //
 //import codechicken.enderstorage.command.help.ColourHelp;

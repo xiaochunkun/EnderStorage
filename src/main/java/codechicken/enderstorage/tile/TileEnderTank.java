@@ -29,30 +29,81 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * EnderStorage液体罐方块实体
+ * 
+ * 实现跨维度液体存储和传输功能的方块实体，主要特性包括：
+ * - 频率化液体存储：通过颜色频率系统共享液体存储空间
+ * - 自动液体输出：支持压力模式自动向相邻容器输出液体
+ * - 网络同步：与客户端保持液体状态和压力状态同步
+ * - 红石控制：支持红石信号控制压力输出模式
+ * 
+ * 核心功能：
+ * - 液体状态管理：管理液体的存储、显示和同步
+ * - 压力系统：控制液体的自动输出和红石交互
+ * - 旋转支持：记录并同步方块的放置方向
+ * - 能力提供：作为IFluidHandler提供液体操作接口
+ * 
+ * 设计特点：
+ * - 继承频率拥有者基类，复用频率管理逻辑
+ * - 双状态系统：分别管理液体状态和压力状态
+ * - 优化的网络同步：只在必要时同步状态变化
+ * 
+ * @author EnderStorage Team
+ * @since 1.0.0
+ */
 public class TileEnderTank extends TileFrequencyOwner {
 
+    /** 方块的旋转角度（0-3），基于玩家放置时的朝向 */
     public int rotation;
+    
+    /** 液体状态管理器，负责液体的显示和同步 */
     public final EnderTankState liquid_state = new EnderTankState();
+    
+    /** 压力状态管理器，负责红石和自动输出控制 */
     public final PressureState pressure_state = new PressureState();
+    
+    /** 能力缓存，用于高效获取相邻方块的液体处理能力 */
     private final CapabilityCache capCache = new CapabilityCache();
 
+    /** 液体处理器实例，懒加载创建 */
     private @Nullable IFluidHandler fluidHandler;
 
+    /** 是否已接收到初始描述数据包（客户端） */
     private boolean described;
 
+    /**
+     * 构造函数
+     * 
+     * @param pos 方块位置
+     * @param state 方块状态
+     */
     public TileEnderTank(BlockPos pos, BlockState state) {
         super(EnderStorageModContent.ENDER_TANK_TILE.get(), pos, state);
     }
 
+    /**
+     * 每游戏刻更新
+     * 
+     * 执行以下操作：
+     * - 更新压力状态（红石信号检测等）
+     * - 在压力模式下自动向相邻容器输出液体
+     * - 更新液体状态（动画和同步）
+     */
     @Override
     public void tick() {
         super.tick();
         assert level != null;
+        
+        // 更新压力状态（客户端和服务器端）
         pressure_state.update(level.isClientSide);
+        
+        // 服务器端：在压力模式下执行液体输出
         if (!level.isClientSide && pressure_state.a_pressure) {
             ejectLiquid();
         }
 
+        // 更新液体状态（动画和同步）
         liquid_state.update(level.isClientSide);
     }
 

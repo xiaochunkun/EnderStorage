@@ -33,7 +33,24 @@ import org.joml.Quaternionf;
 import static codechicken.enderstorage.EnderStorage.MOD_ID;
 
 /**
+ * EnderChest方块实体渲染器
+ * 
+ * 负责EnderChest方块的客户端渲染，主要功能包括：
+ * - 箱子模型渲染：渲染基础的箱子几何体
+ * - 频率按钮渲染：根据频率设置渲染对应颜色的按钮
+ * - 开启动画：处理箱盖的开启和关闭动画
+ * - 末影门户效果：渲染箱子内部的末影门户视觉效果
+ * 
+ * 渲染特性：
+ * - 动态颜色：基于频率的三个颜色通道动态着色按钮
+ * - 平滑动画：使用插值实现流畅的开启关闭动画
+ * - 材质系统：使用专用的箱子材质和按钮材质
+ * - 光照集成：正确处理光照和阴影效果
+ * 
  * Created by covers1624 on 4/12/2016.
+ * 
+ * @author EnderStorage Team
+ * @since 1.0.0
  */
 public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest> {
 

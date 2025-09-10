@@ -1,3 +1,26 @@
+/**
+ * 末影存储合成配方包装器类（已废弃）
+ * 
+ * 这是用于JEI集成的配方包装器实现，目前已被注释掉。
+ * 负责将末影存储的自定义配方适配到JEI的显示系统中。
+ * 
+ * 原功能包括：
+ * - 包装末影存储的重新着色配方
+ * - 处理羊毛颜色与频率的映射关系
+ * - 提供动态的配方输入输出显示
+ * - 支持JEI的焦点功能（点击物品查看相关配方）
+ * 
+ * 配方逻辑：
+ * - 使用不同颜色的羊毛来设置末影存储设备的频率
+ * - 支持所有16种Minecraft颜色
+ * - 可以根据焦点物品动态调整显示的配方
+ * 
+ * TODO: 需要根据新版本的JEI API重新实现这个包装器
+ * 
+ * @author covers1624
+ * @since 8/07/2017
+ * @deprecated 使用旧版JEI API，需要重构
+ */
 //package codechicken.enderstorage.plugin.jei;
 //
 //import codechicken.enderstorage.api.Frequency;

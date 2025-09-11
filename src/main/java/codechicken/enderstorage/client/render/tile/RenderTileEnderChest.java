@@ -67,10 +67,10 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
         CCRenderState ccrs = CCRenderState.instance();
         ccrs.brightness = packedLight;
         ccrs.overlay = packedOverlay;
-        renderChest(ccrs, mStack, getter, enderChest.rotation, enderChest.getFrequency(), (float) enderChest.getRadianLidAngle(partialTicks), RenderUtils.getTimeOffset(enderChest.getBlockPos()), enderChest.getLevel());
+        renderChest(ccrs, mStack, getter, enderChest.rotation, enderChest.getFrequency(), (float) enderChest.getRadianLidAngle(partialTicks), RenderUtils.getTimeOffset(enderChest.getBlockPos()), enderChest.getLevel(), enderChest.getBlockPos());
     }
 
-    public void renderChest(CCRenderState ccrs, PoseStack pose, MultiBufferSource source, int rotation, Frequency freq, float lidAngle, int pearlOffset, net.minecraft.world.level.Level level) {
+    public void renderChest(CCRenderState ccrs, PoseStack pose, MultiBufferSource source, int rotation, Frequency freq, float lidAngle, int pearlOffset, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         Matrix4 mat = new Matrix4(pose);
         if (lidAngle != 0) {
             renderEndPortal.render(mat, source);
@@ -128,21 +128,27 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
             pose.translate(x, y, z);
             // Lay item flat on lid
             pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
-            pose.scale(0.5F, 0.5F, 0.5F);
+            // 缩放为原来的 1/3
+            pose.scale(0.33333334F, 0.33333334F, 0.33333334F);
+            // 使用槽位所在位置的光照，修复 3D 物品光照
+            int itemLight = ccrs.brightness;
+            if (level != null && pos != null) {
+                itemLight = net.minecraft.client.renderer.LevelRenderer.getLightColor(level, pos.above());
+            }
             switch (i) {
                 case 0 -> {
                     if (!freq.getLeftStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, source, level, 0);
                     }
                 }
                 case 1 -> {
                     if (!freq.getMiddleStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, source, level, 0);
                     }
                 }
                 case 2 -> {
                     if (!freq.getRightStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, source, level, 0);
                     }
                 }
             }

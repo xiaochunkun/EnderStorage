@@ -25,7 +25,7 @@ public class EnderChestItemRender implements IItemRenderer {
         Frequency freq = Frequency.readFromStack(stack);
         ccrs.brightness = packedLight;
         ccrs.overlay = packedOverlay;
-        tileRender.renderChest(ccrs, poseStack, source, 2, freq, 0.0f, 0, net.minecraft.client.Minecraft.getInstance().level);
+        tileRender.renderChest(ccrs, poseStack, source, 2, freq, 0.0f, 0, net.minecraft.client.Minecraft.getInstance().level, null);
     }
 
     @Override

@@ -58,12 +58,12 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         float valveRot = (float) MathHelper.interpolate(enderTank.pressure_state.b_rotate, enderTank.pressure_state.a_rotate, partialTicks) * 0.01745F;
         int pearlOffset = RenderUtils.getTimeOffset(enderTank.getBlockPos());
         Matrix4 mat = new Matrix4(mStack);
-        renderTank(ccrs, mat.copy(), mStack, source, enderTank.rotation, valveRot, enderTank.getFrequency(), pearlOffset, enderTank.getLevel());
+        renderTank(ccrs, mat.copy(), mStack, source, enderTank.rotation, valveRot, enderTank.getFrequency(), pearlOffset, enderTank.getLevel(), enderTank.getBlockPos());
         renderFluid(ccrs, mat, source, enderTank.liquid_state.c_liquid);
         ccrs.reset();
     }
 
-    public static void renderTank(CCRenderState ccrs, Matrix4 mat, PoseStack pose, MultiBufferSource buffers, int rotation, float valveRot, Frequency freq, int pearlOffset, net.minecraft.world.level.Level level) {
+    public static void renderTank(CCRenderState ccrs, Matrix4 mat, PoseStack pose, MultiBufferSource buffers, int rotation, float valveRot, Frequency freq, int pearlOffset, net.minecraft.world.level.Level level, net.minecraft.core.BlockPos pos) {
         renderEndPortal.render(mat, buffers);
         ccrs.reset();
         mat.translate(0.5, 0, 0.5);
@@ -96,21 +96,27 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
             pose.translate(x - 0.5, y, z - 0.5);
             // Lay item flat
             pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
-            pose.scale(0.5F, 0.5F, 0.5F);
+            // 缩放为原来的 1/3
+            pose.scale(0.33333334F, 0.33333334F, 0.33333334F);
+            // 使用槽位所在位置的光照，修复 3D 物品光照
+            int itemLight = ccrs.brightness;
+            if (level != null && pos != null) {
+                itemLight = net.minecraft.client.renderer.LevelRenderer.getLightColor(level, pos.above());
+            }
             switch (i) {
                 case 0 -> {
                     if (!freq.getLeftStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, buffers, level, 0);
                     }
                 }
                 case 1 -> {
                     if (!freq.getMiddleStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, buffers, level, 0);
                     }
                 }
                 case 2 -> {
                     if (!freq.getRightStack().isEmpty()) {
-                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, itemLight, ccrs.overlay, pose, buffers, level, 0);
                     }
                 }
             }

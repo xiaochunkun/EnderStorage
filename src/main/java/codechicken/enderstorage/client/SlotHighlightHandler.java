@@ -64,13 +64,12 @@ public class SlotHighlightHandler {
         }
 
         // Build the hovered slot's cuboid in world space.
-        // Base square centered box from constants.
+        // Base square box from constants (bottom anchored like VoxelShape definitions).
         double hh = TileFrequencyOwner.SLOT_HALF;
-        double hy = TileFrequencyOwner.SLOT_HEIGHT * 0.5;
-        Cuboid6 box = new Cuboid6(-hh, -hy, -hh, hh, hy, hh);
+        Cuboid6 box = new Cuboid6(-hh, 0, -hh, hh, TileFrequencyOwner.SLOT_HEIGHT, hh);
 
         if (be instanceof TileEnderChest chest) {
-            // Chest local centers (pre-rotation), top surface ~14/16
+            // Chest local bottom Y on top surface ~14/16
             double y = 14D / 16D + 0.001D;
             double x = slotIndex == 0 ? -3D / 16D : (slotIndex == 1 ? 3D / 16D : 0D);
             double z = slotIndex == 2 ? 2D / 16D : -2D / 16D;
@@ -78,7 +77,7 @@ public class SlotHighlightHandler {
             box.apply(new codechicken.lib.vec.Translation(0.5 + x, y, 0.5 + z));
             box.apply(new Rotation((-90 * (chest.rotation)) * MathHelper.torad, Vector3.Y_POS).at(new Vector3(0.5, y, 0.5)));
         } else if (be instanceof TileEnderTank tank) {
-            // Tank uses absolute local coords, then rotates around (0.5, 0, 0.5) by -90deg*(rotation+2)
+            // Tank local bottom Y on top surface ~0.91
             double y = 0.91 + 0.001;
             double cx = (slotIndex == 0 ? 0.40 : (slotIndex == 1 ? 0.60 : 0.50));
             double cz = (slotIndex == 2 ? 0.58 : 0.42);

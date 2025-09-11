@@ -39,13 +39,16 @@ public class BlockEnderTank extends BlockEnderStorage {
         //          1 2 3 4  5 6 7 8  9 ROT
         int asd = 0b00000000_00000000_00000000_00000000;
         // 三角布局：0=左上，1=右上，2=中下（绝对坐标，后续会按朝向旋转）
-        buttonT[0] = new Scale(0.6).with(new Translation(0.40, 0.91, 0.42));
-        buttonT[1] = new Scale(0.6).with(new Translation(0.60, 0.91, 0.42));
-        buttonT[2] = new Scale(0.6).with(new Translation(0.50, 0.91, 0.58));
+        // 命中盒大小由 TileFrequencyOwner.SELECTION_BUTTON 控制，这里仅做平移（不缩放）。
+        buttonT[0] = new Translation(0.40, 0.91, 0.42);
+        buttonT[1] = new Translation(0.60, 0.91, 0.42);
+        buttonT[2] = new Translation(0.50, 0.91, 0.58);
 
         Cuboid6 dialBase = new Cuboid6(0.358, 0.268, 0.05, 0.662, 0.565, 0.15);
         for (int rot = 0; rot < 4; rot++) {
-            Transformation rotation = Rotation.quarterRotations[rot ^ 2].at(CENTER);
+            // 与渲染一致：-90° * (rotation + 2) -> quarterRotations[(-rot - 2) & 3]
+            int idx = (-rot - 2) & 3;
+            Transformation rotation = Rotation.quarterRotations[idx].at(CENTER);
             for (int button = 0; button < 3; button++) {
                 BUTTONS[rot][button] = new IndexedVoxelShape(
                         VoxelShapeCache.getShape(TileFrequencyOwner.SELECTION_BUTTON.copy().apply(buttonT[button]).apply(rotation)),

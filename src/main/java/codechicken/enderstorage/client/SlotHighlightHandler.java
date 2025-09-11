@@ -38,6 +38,7 @@ public class SlotHighlightHandler {
     public static final float H_B = 1.0F; // blue
     public static final float H_A = 0.6F; // alpha (semi-transparent by default)
     public static final double H_INFLATE = 0.0025; // outline expand to avoid z-fighting
+    public static final double H_SCALE = 1.4; // custom highlight scale vs slot box center
 
     @SubscribeEvent
     public static void onRenderHighlight(RenderHighlightEvent.Block event) {
@@ -49,9 +50,10 @@ public class SlotHighlightHandler {
         if (!(retrace instanceof SubHitBlockHitResult sub)) {
             return; // Not our traced type.
         }
-        if (!(event.getTarget() instanceof BlockHitResult bhr)) {
+        if (!(event.getTarget() instanceof BlockHitResult)) {
             return;
         }
+        BlockHitResult bhr = event.getTarget();
         BlockPos pos = bhr.getBlockPos();
         BlockEntity be = mc.level.getBlockEntity(pos);
         if (!(be instanceof TileFrequencyOwner)) {
@@ -88,7 +90,15 @@ public class SlotHighlightHandler {
         VertexConsumer vc = event.getMultiBufferSource().getBuffer(RenderType.lines());
         Vec3 cam = event.getCamera().getPosition();
 
-        AABB aabb = new AABB(box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z)
+        AABB base = new AABB(box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z);
+        // Scale about center to enlarge the visible outline independently of hitbox size.
+        double cx = (base.minX + base.maxX) * 0.5;
+        double cy = (base.minY + base.maxY) * 0.5;
+        double cz = (base.minZ + base.maxZ) * 0.5;
+        double hx = (base.maxX - base.minX) * 0.5 * H_SCALE;
+        double hy = (base.maxY - base.minY) * 0.5 * H_SCALE;
+        double hz = (base.maxZ - base.minZ) * 0.5 * H_SCALE;
+        AABB aabb = new AABB(cx - hx, cy - hy, cz - hz, cx + hx, cy + hy, cz + hz)
                 .inflate(H_INFLATE);
         AABB rel = aabb.move(-cam.x, -cam.y, -cam.z);
         LevelRenderer.renderLineBox(ps, vc, rel, H_R, H_G, H_B, H_A);

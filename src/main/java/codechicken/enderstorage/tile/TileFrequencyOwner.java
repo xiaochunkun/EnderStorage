@@ -21,8 +21,11 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class TileFrequencyOwner extends BlockEntity {
 
-    // 槽位选取盒：由原来的长方形改为正方形（X/Z 同为 2/16）
-    public static final Cuboid6 SELECTION_BUTTON = new Cuboid6(-1 / 16D, 0, -1 / 16D, 1 / 16D, 1 / 16D, 1 / 16D);
+    // 槽位高亮/命中区域尺寸常量，可调大/调小（单位：方块）
+    public static final double SLOT_HALF = 2D / 16D; // X/Z 半径（默认宽 4/16）
+    public static final double SLOT_HEIGHT = 1D / 16D; // Y 高度
+    // 槽位选取盒：正方形（X/Z 同为 2*SLOT_HALF）
+    public static final Cuboid6 SELECTION_BUTTON = new Cuboid6(-SLOT_HALF, 0, -SLOT_HALF, SLOT_HALF, SLOT_HEIGHT, SLOT_HALF);
 
     protected Frequency frequency = new Frequency();
     private int changeCount;

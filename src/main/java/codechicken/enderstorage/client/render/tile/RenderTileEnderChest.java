@@ -1,11 +1,8 @@
 package codechicken.enderstorage.client.render.tile;
 
 import codechicken.enderstorage.api.Frequency;
-import codechicken.enderstorage.block.BlockEnderChest;
-import codechicken.enderstorage.client.model.ButtonModelLibrary;
 import codechicken.enderstorage.client.render.RenderCustomEndPortal;
 import codechicken.enderstorage.tile.TileEnderChest;
-import codechicken.lib.colour.EnumColour;
 import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.CCModelLibrary;
 import codechicken.lib.render.CCRenderState;
@@ -14,9 +11,9 @@ import codechicken.lib.util.ClientUtils;
 import codechicken.lib.vec.Matrix4;
 import codechicken.lib.vec.Rotation;
 import codechicken.lib.vec.Vector3;
-import codechicken.lib.vec.uv.UVTranslation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -25,9 +22,11 @@ import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemDisplayContext;
 import org.joml.Quaternionf;
 
 /**
@@ -36,7 +35,7 @@ import org.joml.Quaternionf;
 public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest> {
 
     private static final RenderType chestType = RenderType.entityCutout(new ResourceLocation("enderstorage:textures/enderchest.png"));
-    private static final RenderType buttonType = RenderType.entitySolid(new ResourceLocation("enderstorage:textures/buttons.png"));
+    // private static final RenderType buttonType = RenderType.entitySolid(new ResourceLocation("enderstorage:textures/buttons.png"));
     private static final RenderType pearlType = CCModelLibrary.getIcos4RenderType(new ResourceLocation("enderstorage:textures/hedronmap.png"));
     private static final RenderCustomEndPortal renderEndPortal = new RenderCustomEndPortal(0.626, 0.188, 0.812, 0.188, 0.812);
 
@@ -68,10 +67,10 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
         CCRenderState ccrs = CCRenderState.instance();
         ccrs.brightness = packedLight;
         ccrs.overlay = packedOverlay;
-        renderChest(ccrs, mStack, getter, enderChest.rotation, enderChest.getFrequency(), (float) enderChest.getRadianLidAngle(partialTicks), RenderUtils.getTimeOffset(enderChest.getBlockPos()));
+        renderChest(ccrs, mStack, getter, enderChest.rotation, enderChest.getFrequency(), (float) enderChest.getRadianLidAngle(partialTicks), RenderUtils.getTimeOffset(enderChest.getBlockPos()), enderChest.getLevel());
     }
 
-    public void renderChest(CCRenderState ccrs, PoseStack pose, MultiBufferSource source, int rotation, Frequency freq, float lidAngle, int pearlOffset) {
+    public void renderChest(CCRenderState ccrs, PoseStack pose, MultiBufferSource source, int rotation, Frequency freq, float lidAngle, int pearlOffset, net.minecraft.world.level.Level level) {
         Matrix4 mat = new Matrix4(pose);
         if (lidAngle != 0) {
             renderEndPortal.render(mat, source);
@@ -99,18 +98,57 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
         pose.popPose();
 
         mat.translate(0.5, 0, 0.5);
-        // Buttons
-        ccrs.bind(buttonType, source);
-        Matrix4 buttonCommon = mat.copy();
-        buttonCommon.rotate((-90 * (rotation)) * MathHelper.torad, Vector3.Y_POS);
-        buttonCommon.apply(new Rotation(lidAngle, 1, 0, 0).at(new Vector3(-8 / 16D, 9D / 16D, -7 / 16D)));
+        // 顶部槽位：改为物品可视化显示（不再使用颜色按钮纹理）。
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+        // Use PoseStack for item rendering with similar transforms.
+        pose.pushPose();
+        pose.translate(0.5, 0, 0.5);
+        pose.mulPose(new Quaternionf().rotateXYZ(0, (float) (-rotation * 90F * MathHelper.torad), 0));
+        // rotate around chest lid pivot
+        pose.translate(-8F / 16F, 9F / 16F, -7F / 16F);
+        pose.mulPose(new Quaternionf().rotateXYZ(lidAngle, 0, 0));
+        pose.translate(8F / 16F, -9F / 16F, 7F / 16F);
 
-        EnumColour[] colours = freq.toArray();
         for (int i = 0; i < 3; i++) {
-            Matrix4 buttonMat = buttonCommon.copy();
-            buttonMat.apply(BlockEnderChest.buttonT[i]);
-            ButtonModelLibrary.button.render(ccrs, buttonMat, new UVTranslation(0.25 * (colours[i].getWoolMeta() % 4), 0.25 * (colours[i].getWoolMeta() / 4)));
+            // 三角布局：0=左上，1=右上，2=中下
+            float y = 14F / 16F + 0.001F;
+            float x;
+            float z;
+            if (i == 0) { // 左上
+                x = -3F / 16F;
+                z = -2F / 16F;
+            } else if (i == 1) { // 右上
+                x = 3F / 16F;
+                z = -2F / 16F;
+            } else { // 中下
+                x = 0F;
+                z = 2F / 16F;
+            }
+            pose.pushPose();
+            pose.translate(x, y, z);
+            // Lay item flat on lid
+            pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
+            pose.scale(0.5F, 0.5F, 0.5F);
+            switch (i) {
+                case 0 -> {
+                    if (!freq.getLeftStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                    }
+                }
+                case 1 -> {
+                    if (!freq.getMiddleStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                    }
+                }
+                case 2 -> {
+                    if (!freq.getRightStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, source, level, 0);
+                    }
+                }
+            }
+            pose.popPose();
         }
+        pose.popPose();
 
         // Pearl
         if (lidAngle != 0) {

@@ -1,0 +1,91 @@
+name: Bug 报告
+description: 报告崩溃、回归或功能异常
+title: "[Bug] 简要描述问题"
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈！提交前请确认：
+        - 已搜索现有 Issue，避免重复。
+        - 采用可复现的最小环境（尽量只安装必须的 Mod）。
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 提交前检查
+      options:
+        - label: 我已搜索现有 Issue，确认未重复
+          required: true
+        - label: 我已在与问题相关的最新版本上重现
+          required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: 版本信息（必填）
+      description: "Minecraft / NeoForge / EnderStorage / CodeChickenLib 版本"
+      placeholder: "MC 1.20.1, NeoForge 47.1.65, EnderStorage x.x.x, CCL 4.4.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 运行环境
+      description: 操作系统、Java 版本、是否与其他 Mod 一起使用等
+      placeholder: "Windows 11, JDK 17, 搭配 JEI 等"
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤（必填）
+      description: 提供清晰步骤，最小化复现更佳
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+        实际结果：...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为（必填）
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为与日志
+      description: 粘贴崩溃日志或最新日志（尽量使用 Gist/附件），可附截图
+
+  - type: dropdown
+    id: side
+    attributes:
+      label: 影响范围（必选）
+      options:
+        - 客户端
+        - 服务端
+        - 两者
+    validations:
+      required: true
+
+  - type: textarea
+    id: mods
+    attributes:
+      label: 其他已安装 Mod 列表（如适用）
+
+  - type: input
+    id: repro_link
+    attributes:
+      label: 最小复现世界/仓库链接（可选）
+      placeholder: GitHub/Gist/网盘链接
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 其他补充信息
+

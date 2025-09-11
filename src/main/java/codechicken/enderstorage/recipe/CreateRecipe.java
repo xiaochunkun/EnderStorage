@@ -45,7 +45,7 @@ public class CreateRecipe extends RecipeBase {
                 }
             }
         }
-        Frequency frequency = new Frequency(colour, colour, colour);
+        Frequency frequency = new Frequency(Frequency.dyeItemFor(colour), Frequency.dyeItemFor(colour), Frequency.dyeItemFor(colour));
         return frequency.writeToStack(super.assemble(inv, pRegistryAccess));
     }
 

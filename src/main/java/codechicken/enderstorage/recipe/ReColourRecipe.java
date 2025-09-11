@@ -60,9 +60,10 @@ public class ReColourRecipe extends RecipeBase {
                 }
             }
         }
-        currFreq.setLeft(colours[0]);
-        currFreq.setMiddle(colours[1]);
-        currFreq.setRight(colours[2]);
+        // Map resulting颜色 -> 染料物品类型
+        currFreq.setLeft(Frequency.dyeItemFor(colours[0]));
+        currFreq.setMiddle(Frequency.dyeItemFor(colours[1]));
+        currFreq.setRight(Frequency.dyeItemFor(colours[2]));
 
         return currFreq.writeToStack(super.assemble(inv, pRegistryAccess));
     }

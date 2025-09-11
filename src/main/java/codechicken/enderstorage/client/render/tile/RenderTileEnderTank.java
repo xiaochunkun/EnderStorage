@@ -2,24 +2,25 @@ package codechicken.enderstorage.client.render.tile;
 
 import codechicken.enderstorage.api.Frequency;
 import codechicken.enderstorage.block.BlockEnderTank;
-import codechicken.enderstorage.client.model.ButtonModelLibrary;
 import codechicken.enderstorage.client.render.RenderCustomEndPortal;
 import codechicken.enderstorage.tile.TileEnderTank;
-import codechicken.lib.colour.EnumColour;
 import codechicken.lib.fluid.FluidUtils;
 import codechicken.lib.math.MathHelper;
 import codechicken.lib.render.*;
 import codechicken.lib.render.model.OBJParser;
 import codechicken.lib.util.ClientUtils;
 import codechicken.lib.vec.*;
-import codechicken.lib.vec.uv.UVTranslation;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.item.ItemDisplayContext;
+import org.joml.Quaternionf;
 
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
 
     public static final CCModel tankModel;
     public static final CCModel valveModel;
-    public static final CCModel[] buttons;
+    // public static final CCModel[] buttons;
     public static final RenderCustomEndPortal renderEndPortal = new RenderCustomEndPortal(0.1205, 0.24, 0.76, 0.24, 0.76);
 
     static {
@@ -43,10 +44,7 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         valveModel = models.remove("Valve").apply(fix).computeNormals();
         tankModel = CCModel.combine(models.values()).apply(fix).computeNormals().shrinkUVs(0.004);
 
-        buttons = new CCModel[3];
-        for (int i = 0; i < 3; i++) {
-            buttons[i] = ButtonModelLibrary.button.copy().apply(BlockEnderTank.buttonT[i].with(new Translation(-0.5, 0, -0.5)));
-        }
+        // buttons removed; item rendering is used instead.
     }
 
     public RenderTileEnderTank(BlockEntityRendererProvider.Context context) {
@@ -60,12 +58,12 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         float valveRot = (float) MathHelper.interpolate(enderTank.pressure_state.b_rotate, enderTank.pressure_state.a_rotate, partialTicks) * 0.01745F;
         int pearlOffset = RenderUtils.getTimeOffset(enderTank.getBlockPos());
         Matrix4 mat = new Matrix4(mStack);
-        renderTank(ccrs, mat.copy(), source, enderTank.rotation, valveRot, enderTank.getFrequency(), pearlOffset);
+        renderTank(ccrs, mat.copy(), mStack, source, enderTank.rotation, valveRot, enderTank.getFrequency(), pearlOffset, enderTank.getLevel());
         renderFluid(ccrs, mat, source, enderTank.liquid_state.c_liquid);
         ccrs.reset();
     }
 
-    public static void renderTank(CCRenderState ccrs, Matrix4 mat, MultiBufferSource buffers, int rotation, float valveRot, Frequency freq, int pearlOffset) {
+    public static void renderTank(CCRenderState ccrs, Matrix4 mat, PoseStack pose, MultiBufferSource buffers, int rotation, float valveRot, Frequency freq, int pearlOffset, net.minecraft.world.level.Level level) {
         renderEndPortal.render(mat, buffers);
         ccrs.reset();
         mat.translate(0.5, 0, 0.5);
@@ -73,14 +71,52 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         ccrs.bind(baseType, buffers);
         tankModel.render(ccrs, mat);
         Matrix4 valveMat = mat.copy().apply(new Rotation(valveRot, Vector3.Z_POS).at(new Vector3(0, 0.4165, 0)));
-        valveModel.render(ccrs, valveMat, new UVTranslation(0, freq.hasOwner() ? 13 / 64D : 0));
+        valveModel.render(ccrs, valveMat);
 
-        ccrs.bind(buttonType, buffers);
-        EnumColour[] colours = freq.toArray();
+        // 顶部槽位：以物品显示，不再使用按钮纹理
+        pose.pushPose();
+        // Align with 'mat' transforms: mat currently has translated(0.5,0,0.5) and rotated around Y
+        // Recreate similar transform for ItemRenderer
+        pose.translate(0.5, 0, 0.5);
+        pose.mulPose(new Quaternionf().rotateXYZ(0, (float) ((-90 * (rotation + 2)) * MathHelper.torad), 0));
+        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         for (int i = 0; i < 3; i++) {
-            //noinspection IntegerDivisionInFloatingPointContext
-            buttons[i].render(ccrs, mat, new UVTranslation(0.25 * (colours[i].getWoolMeta() % 4), 0.25 * (colours[i].getWoolMeta() / 4)));
+            // 三角布局：0=左上，1=右上，2=中下（绝对坐标，随后减去 0.5 进入局部）
+            double y = 0.91 + 0.001;
+            double x;
+            double z;
+            if (i == 0) { // 左上
+                x = 0.40; z = 0.42;
+            } else if (i == 1) { // 右上
+                x = 0.60; z = 0.42;
+            } else { // 中下
+                x = 0.50; z = 0.58;
+            }
+            pose.pushPose();
+            pose.translate(x - 0.5, y, z - 0.5);
+            // Lay item flat
+            pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
+            pose.scale(0.5F, 0.5F, 0.5F);
+            switch (i) {
+                case 0 -> {
+                    if (!freq.getLeftStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getLeftStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                    }
+                }
+                case 1 -> {
+                    if (!freq.getMiddleStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getMiddleStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                    }
+                }
+                case 2 -> {
+                    if (!freq.getRightStack().isEmpty()) {
+                        itemRenderer.renderStatic(freq.getRightStack(), ItemDisplayContext.FIXED, ccrs.brightness, ccrs.overlay, pose, buffers, level, 0);
+                    }
+                }
+            }
+            pose.popPose();
         }
+        pose.popPose();
 
         double time = ClientUtils.getRenderTime() + pearlOffset;
         Matrix4 pearlMat = RenderUtils.getMatrix(mat.copy(), new Vector3(0, 0.45 + RenderUtils.getPearlBob(time) * 2, 0), new Rotation(time / 3, Vector3.Y_POS), 0.04);

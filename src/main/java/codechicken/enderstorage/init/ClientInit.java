@@ -74,20 +74,21 @@ public class ClientInit {
                 new ResourceLocation(MOD_ID, "open"),
                 (ClampedItemPropertyFunction) (pStack, pLevel, pEntity, pSeed) -> EnderStorageManager.instance(true).getStorage(Frequency.readFromStack(pStack), EnderItemStorage.TYPE).openCount()
         );
+        // 颜色槽位已改为“物品槽位”，此处占位返回 0，以使用默认贴图。
         ItemProperties.register(
                 ENDER_POUCH.get(),
                 new ResourceLocation(MOD_ID, "left"),
-                (pStack, pLevel, pEntity, pSeed) -> Frequency.readFromStack(pStack).getLeft().ordinal()
+                (pStack, pLevel, pEntity, pSeed) -> 0
         );
         ItemProperties.register(
                 ENDER_POUCH.get(),
                 new ResourceLocation(MOD_ID, "middle"),
-                (pStack, pLevel, pEntity, pSeed) -> Frequency.readFromStack(pStack).getMiddle().ordinal()
+                (pStack, pLevel, pEntity, pSeed) -> 0
         );
         ItemProperties.register(
                 ENDER_POUCH.get(),
                 new ResourceLocation(MOD_ID, "right"),
-                (pStack, pLevel, pEntity, pSeed) -> Frequency.readFromStack(pStack).getRight().ordinal()
+                (pStack, pLevel, pEntity, pSeed) -> 0
         );
     }
 

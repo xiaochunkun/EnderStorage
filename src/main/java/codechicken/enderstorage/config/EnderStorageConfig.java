@@ -35,6 +35,7 @@ public class EnderStorageConfig {
 
     public static boolean disableCreatorVisuals;
     public static boolean useVanillaEnderChestSounds;
+    public static boolean retainFrequencyOnBreak;
 
     public static void load() {
         LOCK.lock();
@@ -54,6 +55,10 @@ public class EnderStorageConfig {
                 .setComment("The size of each inventory of EnderStorage, 0 = 3x3, 1 = 3x9, 2 = 6x9, default = 1")
                 .setDefaultInt(1)
                 .getInt();
+        retainFrequencyOnBreak = config.getValue("retainFrequencyOnBreak")
+                .setComment("If true, dropped blocks keep their Frequency (three item slots). If false, drops are reset.")
+                .setDefaultBoolean(true)
+                .getBoolean();
 
         disableCreatorVisuals = config.getValue("disableCreatorVisuals")
                 .setComment("Disables the tank on top of creators heads.")

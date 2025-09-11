@@ -3,7 +3,6 @@ package codechicken.enderstorage.block;
 import codechicken.enderstorage.api.Frequency;
 import codechicken.enderstorage.config.EnderStorageConfig;
 import codechicken.enderstorage.tile.TileFrequencyOwner;
-import codechicken.lib.colour.EnumColour;
 import codechicken.lib.raytracer.RayTracer;
 import codechicken.lib.raytracer.SubHitBlockHitResult;
 import codechicken.lib.util.ItemUtils;
@@ -81,7 +80,9 @@ public abstract class BlockEnderStorage extends BaseEntityBlock// implements ICu
         if (EnderStorageConfig.anarchyMode) {
             freq.setOwner(null);
         }
-        freq.writeToStack(stack);
+        if (EnderStorageConfig.retainFrequencyOnBreak) {
+            freq.writeToStack(stack);
+        }
         return stack;
     }
 
@@ -119,21 +120,24 @@ public abstract class BlockEnderStorage extends BaseEntityBlock// implements ICu
                 }
             }
         } else if (hit.subHit >= 1 && hit.subHit <= 3) {
-            ItemStack item = player.getInventory().getSelected();
-            if (!item.isEmpty()) {
-                EnumColour dye = EnumColour.fromDyeStack(item);
-                if (dye != null) {
-                    EnumColour[] colours = { null, null, null };
-                    if (colours[hit.subHit - 1] == dye) {
-                        return InteractionResult.FAIL;
-                    }
-                    colours[hit.subHit - 1] = dye;
-                    owner.setFreq(owner.getFrequency().copy().set(colours));
-                    if (!player.getAbilities().instabuild) {
-                        item.shrink(1);
-                    }
-                    return InteractionResult.FAIL;
-                }
+            // 按槽位设置“频率物品”：空手清空，手持物品设置为该物品类型（不消耗玩家物品）。
+            int index = hit.subHit - 1; // 0,1,2 -> 左、中、右
+            ItemStack held = player.getInventory().getSelected();
+            Frequency freq = owner.getFrequency().copy();
+
+            if (held.isEmpty()) {
+                if (index == 0) freq.setLeft(null);
+                if (index == 1) freq.setMiddle(null);
+                if (index == 2) freq.setRight(null);
+                owner.setFreq(freq);
+                return InteractionResult.SUCCESS;
+            } else {
+                // 仅匹配物品类型，忽略 NBT/耐久/数量
+                if (index == 0) freq.setLeft(held.getItem());
+                if (index == 1) freq.setMiddle(held.getItem());
+                if (index == 2) freq.setRight(held.getItem());
+                owner.setFreq(freq);
+                return InteractionResult.SUCCESS;
             }
         }
         return !player.isCrouching() && owner.activate(player, hit.subHit, hand) ? InteractionResult.SUCCESS : InteractionResult.FAIL;

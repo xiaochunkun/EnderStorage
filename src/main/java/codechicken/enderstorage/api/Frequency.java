@@ -6,8 +6,12 @@ import codechicken.lib.data.MCDataOutput;
 import codechicken.lib.util.Copyable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.UUID;
 
@@ -16,21 +20,21 @@ import java.util.UUID;
  */
 public final class Frequency implements Copyable<Frequency> {
 
-    public EnumColour left;
-    public EnumColour middle;
-    public EnumColour right;
+    private Item left;
+    private Item middle;
+    private Item right;
     public UUID owner;
     public Component ownerName;
 
     public Frequency() {
-        this(EnumColour.WHITE, EnumColour.WHITE, EnumColour.WHITE);
+        this(Items.AIR, Items.AIR, Items.AIR);
     }
 
-    public Frequency(EnumColour left, EnumColour middle, EnumColour right) {
+    public Frequency(Item left, Item middle, Item right) {
         this(left, middle, right, null, null);
     }
 
-    public Frequency(EnumColour left, EnumColour middle, EnumColour right, UUID owner, Component ownerName) {
+    public Frequency(Item left, Item middle, Item right, UUID owner, Component ownerName) {
         this.left = left;
         this.middle = middle;
         this.right = right;
@@ -47,39 +51,33 @@ public final class Frequency implements Copyable<Frequency> {
     }
 
     public static Frequency fromString(String left, String middle, String right, UUID owner, Component ownerName) {
-        EnumColour c1 = EnumColour.fromName(left);
-        EnumColour c2 = EnumColour.fromName(middle);
-        EnumColour c3 = EnumColour.fromName(right);
-        if (c1 == null) {
-            throw new RuntimeException(left + " is an invalid colour!");
+        Item i1 = ForgeRegistries.ITEMS.getValue(new ResourceLocation(left));
+        Item i2 = ForgeRegistries.ITEMS.getValue(new ResourceLocation(middle));
+        Item i3 = ForgeRegistries.ITEMS.getValue(new ResourceLocation(right));
+        if (i1 == null || i1 == Items.AIR) {
+            throw new RuntimeException(left + " is an invalid item!");
         }
-        if (c2 == null) {
-            throw new RuntimeException(middle + " is an invalid colour!");
+        if (i2 == null || i2 == Items.AIR) {
+            throw new RuntimeException(middle + " is an invalid item!");
         }
-        if (c3 == null) {
-            throw new RuntimeException(right + " is an invalid colour!");
+        if (i3 == null || i3 == Items.AIR) {
+            throw new RuntimeException(right + " is an invalid item!");
         }
-        return new Frequency(c1, c2, c3, owner, ownerName);
+        return new Frequency(i1, i2, i3, owner, ownerName);
     }
 
-    public Frequency setLeft(EnumColour left) {
-        if (left != null) {
-            this.left = left;
-        }
+    public Frequency setLeft(Item left) {
+        this.left = left == null ? Items.AIR : left;
         return this;
     }
 
-    public Frequency setMiddle(EnumColour middle) {
-        if (middle != null) {
-            this.middle = middle;
-        }
+    public Frequency setMiddle(Item middle) {
+        this.middle = middle == null ? Items.AIR : middle;
         return this;
     }
 
-    public Frequency setRight(EnumColour right) {
-        if (right != null) {
-            this.right = right;
-        }
+    public Frequency setRight(Item right) {
+        this.right = right == null ? Items.AIR : right;
         return this;
     }
 
@@ -99,10 +97,12 @@ public final class Frequency implements Copyable<Frequency> {
         return owner != null && ownerName != null;
     }
 
-    public Frequency set(EnumColour[] colours) {
-        setLeft(colours[0]);
-        setMiddle(colours[1]);
-        setRight(colours[2]);
+    public Frequency set(Item[] items) {
+        if (items.length >= 3) {
+            setLeft(items[0]);
+            setMiddle(items[1]);
+            setRight(items[2]);
+        }
         return this;
     }
 
@@ -115,16 +115,28 @@ public final class Frequency implements Copyable<Frequency> {
         return this;
     }
 
-    public EnumColour getLeft() {
+    public Item getLeft() {
         return left;
     }
 
-    public EnumColour getMiddle() {
+    public Item getMiddle() {
         return middle;
     }
 
-    public EnumColour getRight() {
+    public Item getRight() {
         return right;
+    }
+
+    public ItemStack getLeftStack() {
+        return left == null || left == Items.AIR ? ItemStack.EMPTY : new ItemStack(left);
+    }
+
+    public ItemStack getMiddleStack() {
+        return middle == null || middle == Items.AIR ? ItemStack.EMPTY : new ItemStack(middle);
+    }
+
+    public ItemStack getRightStack() {
+        return right == null || right == Items.AIR ? ItemStack.EMPTY : new ItemStack(right);
     }
 
     public UUID getOwner() {
@@ -135,14 +147,25 @@ public final class Frequency implements Copyable<Frequency> {
         return ownerName;
     }
 
-    public EnumColour[] toArray() {
-        return new EnumColour[] { left, middle, right };
+    public Item[] toArray() {
+        return new Item[] { left, middle, right };
     }
 
     private Frequency read_internal(CompoundTag tagCompound) {
-        left = EnumColour.fromWoolMeta(tagCompound.getInt("left"));
-        middle = EnumColour.fromWoolMeta(tagCompound.getInt("middle"));
-        right = EnumColour.fromWoolMeta(tagCompound.getInt("right"));
+        // New format: string IDs under left_item/middle_item/right_item
+        if (tagCompound.contains("left_item")) {
+            left = readItem(tagCompound.getString("left_item"));
+            middle = readItem(tagCompound.getString("middle_item"));
+            right = readItem(tagCompound.getString("right_item"));
+        } else {
+            // Back-compat: old integer wool meta colours -> map to <colour>_dye items
+            int l = tagCompound.getInt("left");
+            int m = tagCompound.getInt("middle");
+            int r = tagCompound.getInt("right");
+            left = dyeItemFor(EnumColour.fromWoolMeta(l));
+            middle = dyeItemFor(EnumColour.fromWoolMeta(m));
+            right = dyeItemFor(EnumColour.fromWoolMeta(r));
+        }
         if (tagCompound.hasUUID("owner")) {
             owner = tagCompound.getUUID("owner");
         }
@@ -152,10 +175,16 @@ public final class Frequency implements Copyable<Frequency> {
         return this;
     }
 
+    private static Item readItem(String id) {
+        if (id == null || id.isEmpty()) return Items.AIR;
+        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(id));
+        return item == null ? Items.AIR : item;
+    }
+
     private CompoundTag write_internal(CompoundTag tagCompound) {
-        tagCompound.putInt("left", left.getWoolMeta());
-        tagCompound.putInt("middle", middle.getWoolMeta());
-        tagCompound.putInt("right", right.getWoolMeta());
+        tagCompound.putString("left_item", getId(left));
+        tagCompound.putString("middle_item", getId(middle));
+        tagCompound.putString("right_item", getId(right));
         if (owner != null) {
             tagCompound.putUUID("owner", owner);
         }
@@ -163,6 +192,12 @@ public final class Frequency implements Copyable<Frequency> {
             tagCompound.putString("owner_name", Component.Serializer.toJson(ownerName));
         }
         return tagCompound;
+    }
+
+    private static String getId(Item item) {
+        if (item == null || item == Items.AIR) return "minecraft:air";
+        ResourceLocation rl = ForgeRegistries.ITEMS.getKey(item);
+        return rl == null ? "minecraft:air" : rl.toString();
     }
 
     public CompoundTag writeToNBT(CompoundTag tagCompound) {
@@ -195,7 +230,7 @@ public final class Frequency implements Copyable<Frequency> {
     }
 
     public String toModelLoc() {
-        return "left=" + getLeft().getSerializedName() + ",middle=" + getMiddle().getSerializedName() + ",right=" + getRight().getSerializedName() + ",owned=" + hasOwner();
+        return "left=" + getId(getLeft()) + ",middle=" + getId(getMiddle()) + ",right=" + getId(getRight()) + ",owned=" + hasOwner();
     }
 
     @Override
@@ -204,15 +239,14 @@ public final class Frequency implements Copyable<Frequency> {
         if (hasOwner()) {
             owner = ",owner=" + this.owner;
         }
-        return "left=" + getLeft().getSerializedName() + ",middle=" + getMiddle().getSerializedName() + ",right=" + getRight().getSerializedName() + owner;
+        return "left=" + getId(getLeft()) + ",middle=" + getId(getMiddle()) + ",right=" + getId(getRight()) + owner;
     }
 
     public Component getTooltip() {
-        return Component.translatable(getLeft().getUnlocalizedName())
-                .append("/")
-                .append(Component.translatable(getMiddle().getUnlocalizedName()))
-                .append("/")
-                .append(Component.translatable(getRight().getUnlocalizedName()));
+        Component l = getLeftStack().isEmpty() ? Component.literal("empty") : getLeftStack().getHoverName();
+        Component m = getMiddleStack().isEmpty() ? Component.literal("empty") : getMiddleStack().getHoverName();
+        Component r = getRightStack().isEmpty() ? Component.literal("empty") : getRightStack().getHoverName();
+        return l.copy().append("/").append(m).append("/").append(r);
     }
 
     @Override
@@ -223,5 +257,13 @@ public final class Frequency implements Copyable<Frequency> {
     @Override
     public Frequency copy() {
         return new Frequency(this.left, this.middle, this.right, this.owner, this.ownerName);
+    }
+
+    // Utility: map EnumColour (legacy) -> dye item type.
+    public static Item dyeItemFor(EnumColour colour) {
+        if (colour == null) return Items.AIR;
+        String name = colour.getSerializedName();
+        Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation("minecraft", name + "_dye"));
+        return item == null ? Items.AIR : item;
     }
 }

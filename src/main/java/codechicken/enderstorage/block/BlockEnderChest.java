@@ -37,9 +37,10 @@ public class BlockEnderChest extends BlockEnderStorage {
     public static final Transformation[] buttonT = new Transformation[3];
 
     static {
-        for (int button = 0; button < 3; button++) {
-            buttonT[button] = new Translation(-(3 / 16D) + ((3D / 16D) * button), 14D / 16D, 0);
-        }
+        // 三角布局：0=左上，1=右上，2=中下
+        buttonT[0] = new Translation(-(3D / 16D), 14D / 16D, -(2D / 16D));
+        buttonT[1] = new Translation(+(3D / 16D), 14D / 16D, -(2D / 16D));
+        buttonT[2] = new Translation(0D, 14D / 16D, +(2D / 16D));
         for (int rot = 0; rot < 4; rot++) {
             //Build buttons and latch.
             for (int button = 0; button < 3; button++) {

@@ -15,6 +15,16 @@ java {
     withJavadocJar()
 }
 
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+}
+
 group = "io.codechicken"
 archivesBaseName = "EnderStorage"
 
@@ -30,25 +40,69 @@ minecraft {
     accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
     runs {
         client {
-            workingDirectory file('run')
-            mods { enderstorage { source sourceSets.main } }
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                enderstorage {
+                    source sourceSets.main
+                }
+            }
         }
         server {
-            workingDirectory file('run')
-            mods { enderstorage { source sourceSets.main } }
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                enderstorage {
+                    source sourceSets.main
+                }
+            }
         }
         data {
-            workingDirectory file('run')
-            args '--mod', 'enderstorage', '--all', '--output', file("src/main/generated"), '--existing', file("src/main/resources")
-            mods { enderstorage { source sourceSets.main } }
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'enderstorage', '--all', '--output', file('src/main/generated/'), '--existing', file('src/main/resources/')
+            mods {
+                enderstorage {
+                    source sourceSets.main
+                }
+            }
         }
     }
 }
 
 repositories {
     mavenLocal()
+
+    // 中国镜像优先（快速访问）
+    maven { url = "https://maven.aliyun.com/repository/public" }
+    maven { url = "https://maven.aliyun.com/repository/central" }
+
+    // Mojang 库的镜像（优先使用 BMCL）
+    maven {
+        url = "https://bmclapi2.bangbang93.com/maven"
+        content {
+            includeGroupByRegex("com\\.mojang(\\..*)?")
+        }
+    }
+    maven {
+        url = "https://libraries.minecraft.net"
+        content {
+            includeGroupByRegex("com\\.mojang(\\..*)?")
+        }
+    }
+
+    // NeoForge 仓库
+    maven { url = "https://maven.neoforged.net/releases" }
+
+    // 其他主要仓库
     maven { url = "https://chickenbones.net/maven" }
+    maven { url = "https://maven.covers1624.net/" } // Mirror for CodeChicken artifacts
     maven { url = "https://maven.blamejared.com/" }
+    maven { url = "https://maven.minecraftforge.net/" } // Forge legacy artifacts (cpw.mods, etc.)
+    maven { url = "https://repo1.maven.org/maven2" } // Direct Maven Central
 }
 
 dependencies {

@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 常见问题与文档（README）
+    url: https://github.com/TheCBProject/EnderStorage#readme
+    about: 提交问题前请先阅读相关文档与说明。
+  - name: 上游问题追踪（TheCBProject/EnderStorage）
+    url: https://github.com/TheCBProject/EnderStorage/issues
+    about: 若确认为上游问题，可在上游仓库查看和反馈。
+

@@ -29,7 +29,7 @@ public class EnderTankItemRender implements IItemRenderer {
         Frequency freq = Frequency.readFromStack(stack);
         FluidStack fluid = TankSynchroniser.getClientLiquid(freq);
         Matrix4 mat = new Matrix4(poseStack);
-        RenderTileEnderTank.renderTank(ccrs, mat, source, 2, (float) (MathHelper.torad * 90F), freq, 0);
+        RenderTileEnderTank.renderTank(ccrs, mat, poseStack, source, 2, (float) (MathHelper.torad * 90F), freq, 0, net.minecraft.client.Minecraft.getInstance().level);
         mat.translate(-0.5, 0, -0.5);
         RenderTileEnderTank.renderFluid(ccrs, mat, source, fluid);
     }

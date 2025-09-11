@@ -38,9 +38,10 @@ public class BlockEnderTank extends BlockEnderStorage {
     static {
         //          1 2 3 4  5 6 7 8  9 ROT
         int asd = 0b00000000_00000000_00000000_00000000;
-        for (int i = 0; i < 3; i++) {
-            buttonT[i] = new Scale(0.6).with(new Translation(0.35 + (2 - i) * 0.15, 0.91, 0.5));
-        }
+        // 三角布局：0=左上，1=右上，2=中下（绝对坐标，后续会按朝向旋转）
+        buttonT[0] = new Scale(0.6).with(new Translation(0.40, 0.91, 0.42));
+        buttonT[1] = new Scale(0.6).with(new Translation(0.60, 0.91, 0.42));
+        buttonT[2] = new Scale(0.6).with(new Translation(0.50, 0.91, 0.58));
 
         Cuboid6 dialBase = new Cuboid6(0.358, 0.268, 0.05, 0.662, 0.565, 0.15);
         for (int rot = 0; rot < 4; rot++) {

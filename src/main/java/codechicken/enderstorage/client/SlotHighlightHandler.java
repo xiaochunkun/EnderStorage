@@ -78,16 +78,29 @@ public class SlotHighlightHandler {
             box.apply(new codechicken.lib.vec.Translation(0.5 + x, y, 0.5 + z));
             box.apply(new Rotation((-90 * (chest.rotation)) * MathHelper.torad, Vector3.Y_POS).at(new Vector3(0.5, y, 0.5)));
         } else if (be instanceof TileEnderTank tank) {
-            // Tank uses absolute local coords, then rotates around (0.5,0,0.5)
+            // Tank uses absolute local coords, then rotates around (0.5, 0, 0.5) by -90deg*(rotation+2)
             double y = 0.91 + 0.001;
             double cx = (slotIndex == 0 ? 0.40 : (slotIndex == 1 ? 0.60 : 0.50));
             double cz = (slotIndex == 2 ? 0.58 : 0.42);
-            // Translate to rotation origin, rotate, then translate to final position
-            // Build relative vector (from 0.5, y, 0.5)
-            Vector3 rel = new Vector3(cx - 0.5, 0, cz - 0.5);
-            Transformation rot = Rotation.quarterRotations[tank.rotation ^ 2].at(CENTER);
-            rel.apply(rot);
-            box.apply(new codechicken.lib.vec.Translation(0.5 + rel.x, y, 0.5 + rel.z));
+            // Build relative vector from center and rotate it matching render order.
+            double rx = cx - 0.5;
+            double rz = cz - 0.5;
+            int k = (tank.rotation + 2) & 3; // steps of -90 deg
+            switch (k) {
+                case 0 -> {
+                    // no-op
+                }
+                case 1 -> {
+                    double nx = rz; rz = -rx; rx = nx; // -90 deg: (x,z) -> (z,-x)
+                }
+                case 2 -> {
+                    rx = -rx; rz = -rz; // -180
+                }
+                case 3 -> {
+                    double nx = -rz; rz = rx; rx = nx; // -270: (x,z) -> (-z,x)
+                }
+            }
+            box.apply(new codechicken.lib.vec.Translation(0.5 + rx, y, 0.5 + rz));
         } else {
             return;
         }
@@ -106,9 +119,9 @@ public class SlotHighlightHandler {
         double cy = (base.minY + base.maxY) * 0.5;
         double cz = (base.minZ + base.maxZ) * 0.5;
         double hx = (base.maxX - base.minX) * 0.5 * H_SCALE;
-        double hy = (base.maxY - base.minY) * 0.5 * H_SCALE;
+        double hv = (base.maxY - base.minY) * 0.5 * H_SCALE;
         double hz = (base.maxZ - base.minZ) * 0.5 * H_SCALE;
-        AABB aabb = new AABB(cx - hx, cy - hy, cz - hz, cx + hx, cy + hy, cz + hz)
+        AABB aabb = new AABB(cx - hx, cy - hv, cz - hz, cx + hx, cy + hv, cz + hz)
                 .inflate(H_INFLATE);
         AABB rel = aabb.move(-cam.x, -cam.y, -cam.z);
         LevelRenderer.renderLineBox(ps, vc, rel, H_R, H_G, H_B, H_A);

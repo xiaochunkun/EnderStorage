@@ -32,6 +32,13 @@ import static codechicken.lib.vec.Vector3.CENTER;
  */
 public class SlotHighlightHandler {
 
+    // Highlight style constants (change here to tweak color/opacities)
+    public static final float H_R = 1.0F; // red
+    public static final float H_G = 1.0F; // green
+    public static final float H_B = 1.0F; // blue
+    public static final float H_A = 0.6F; // alpha (semi-transparent by default)
+    public static final double H_INFLATE = 0.0025; // outline expand to avoid z-fighting
+
     @SubscribeEvent
     public static void onRenderHighlight(RenderHighlightEvent.Block event) {
         Minecraft mc = Minecraft.getInstance();
@@ -82,12 +89,11 @@ public class SlotHighlightHandler {
         Vec3 cam = event.getCamera().getPosition();
 
         AABB aabb = new AABB(box.min.x, box.min.y, box.min.z, box.max.x, box.max.y, box.max.z)
-                .inflate(0.0025);
+                .inflate(H_INFLATE);
         AABB rel = aabb.move(-cam.x, -cam.y, -cam.z);
-        LevelRenderer.renderLineBox(ps, vc, rel, 1.0F, 1.0F, 1.0F, 0.9F);
+        LevelRenderer.renderLineBox(ps, vc, rel, H_R, H_G, H_B, H_A);
 
         // Cancel vanilla highlight for this tick so only our outline shows.
         event.setCanceled(true);
     }
 }
-

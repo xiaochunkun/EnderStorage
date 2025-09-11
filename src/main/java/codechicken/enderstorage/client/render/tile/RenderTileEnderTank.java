@@ -82,11 +82,11 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
             double x;
             double z;
             if (i == 0) { // 左上
-                x = 0.40; z = 0.42;
+                x = 0.35; z = 0.40;
             } else if (i == 1) { // 右上
-                x = 0.60; z = 0.42;
+                x = 0.65; z = 0.40;
             } else { // 中下
-                x = 0.50; z = 0.58;
+                x = 0.50; z = 0.62;
             }
             pose.pushPose();
             // 旋转坐标以匹配渲染朝向：-90° * (rotation + 2)

@@ -23,7 +23,7 @@ public abstract class TileFrequencyOwner extends BlockEntity {
 
     // Chest 尺寸（较大）
     public static final double CHEST_SLOT_HALF = 2D / 16D; // 半径（宽 4/16）
-    public static final double CHEST_SLOT_HEIGHT = 1D / 16D;
+    public static final double CHEST_SLOT_HEIGHT = 0.8D / 16D;
     public static final float CHEST_ITEM_SCALE = 0.25F;
     public static final double CHEST_ITEM_Y = 14D / 16D + 0.001D; // 物品放置高度（顶面略上）
     // Tank 尺寸（较小）

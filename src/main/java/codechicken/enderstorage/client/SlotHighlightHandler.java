@@ -87,8 +87,8 @@ public class SlotHighlightHandler {
         } else if (be instanceof TileEnderTank tank) {
             // Tank local bottom Y on top surface ~0.91
             double y = 0.91 + 0.001;
-            double cx = (slotIndex == 0 ? 0.40 : (slotIndex == 1 ? 0.60 : 0.50));
-            double cz = (slotIndex == 2 ? 0.58 : 0.42);
+            double cx = (slotIndex == 0 ? 0.35 : (slotIndex == 1 ? 0.65 : 0.50));
+            double cz = (slotIndex == 2 ? 0.62 : 0.40);
             // Build relative vector from center and rotate it matching render order.
             double rx = cx - 0.5;
             double rz = cz - 0.5;

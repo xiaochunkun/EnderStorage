@@ -78,7 +78,7 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         for (int i = 0; i < 3; i++) {
             // 三角布局：0=左上，1=右上，2=中下（绝对坐标，随后减去 0.5 进入局部）
-            double y = 0.91 + 0.001;
+            double y = codechicken.enderstorage.tile.TileFrequencyOwner.TANK_ITEM_Y;
             double x;
             double z;
             if (i == 0) { // 左上

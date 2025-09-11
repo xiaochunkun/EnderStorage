@@ -22,13 +22,15 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class TileFrequencyOwner extends BlockEntity {
 
     // Chest 尺寸（较大）
-    public static final double CHEST_SLOT_HALF = 3D / 16D; // 半径（宽 6/16）
+    public static final double CHEST_SLOT_HALF = 2D / 16D; // 半径（宽 4/16）
     public static final double CHEST_SLOT_HEIGHT = 1D / 16D;
-    public static final float CHEST_ITEM_SCALE = 0.18F;
+    public static final float CHEST_ITEM_SCALE = 0.25F;
+    public static final double CHEST_ITEM_Y = 14D / 16D + 0.001D; // 物品放置高度（顶面略上）
     // Tank 尺寸（较小）
-    public static final double TANK_SLOT_HALF = 2.5D / 16D; // 半径（宽 5/16）
+    public static final double TANK_SLOT_HALF = 1.5D / 16D; // 半径（宽 3/16）
     public static final double TANK_SLOT_HEIGHT = 1D / 16D;
     public static final float TANK_ITEM_SCALE = 0.16F;
+    public static final double TANK_ITEM_Y = 0.925D; // 物品放置高度（略高以避免重合）
     // 槽位选取盒：正方形（Chest / Tank 区分）
     public static final Cuboid6 CHEST_SELECTION_BUTTON = new Cuboid6(-CHEST_SLOT_HALF, 0, -CHEST_SLOT_HALF, CHEST_SLOT_HALF, CHEST_SLOT_HEIGHT, CHEST_SLOT_HALF);
     public static final Cuboid6 TANK_SELECTION_BUTTON = new Cuboid6(-TANK_SLOT_HALF, 0, -TANK_SLOT_HALF, TANK_SLOT_HALF, TANK_SLOT_HEIGHT, TANK_SLOT_HALF);

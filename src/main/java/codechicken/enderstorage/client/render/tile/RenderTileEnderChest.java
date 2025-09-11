@@ -111,7 +111,7 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
 
         for (int i = 0; i < 3; i++) {
             // 三角布局：0=左上，1=右上，2=中下
-            float y = 14F / 16F + 0.001F;
+            float y = (float) codechicken.enderstorage.tile.TileFrequencyOwner.CHEST_ITEM_Y;
             float x;
             float z;
             if (i == 0) { // 左上

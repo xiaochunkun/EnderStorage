@@ -1,7 +1,5 @@
 package codechicken.enderstorage.client;
 
-import codechicken.enderstorage.block.BlockEnderChest;
-import codechicken.enderstorage.block.BlockEnderTank;
 import codechicken.enderstorage.tile.TileEnderChest;
 import codechicken.enderstorage.tile.TileEnderTank;
 import codechicken.enderstorage.tile.TileFrequencyOwner;
@@ -38,7 +36,7 @@ public class SlotHighlightHandler {
     public static final float H_B = 1.0F; // blue
     public static final float H_A = 0.6F; // alpha (semi-transparent by default)
     public static final double H_INFLATE = 0.0025; // outline expand to avoid z-fighting
-    public static final double H_SCALE = 1.4; // custom highlight scale vs slot box center
+    public static final double H_SCALE = 1.02; // scale relative to slot square (sync by default)
 
     @SubscribeEvent
     public static void onRenderHighlight(RenderHighlightEvent.Block event) {
@@ -66,18 +64,30 @@ public class SlotHighlightHandler {
         }
 
         // Build the hovered slot's cuboid in world space.
-        Cuboid6 box = TileFrequencyOwner.SELECTION_BUTTON.copy();
+        // Base square centered box from constants.
+        double hh = TileFrequencyOwner.SLOT_HALF;
+        double hy = TileFrequencyOwner.SLOT_HEIGHT * 0.5;
+        Cuboid6 box = new Cuboid6(-hh, -hy, -hh, hh, hy, hh);
+
         if (be instanceof TileEnderChest chest) {
-            Transformation t = BlockEnderChest.buttonT[slotIndex];
-            box.apply(t);
-            // Translate to block local center then rotate by chest facing.
-            box.apply(new codechicken.lib.vec.Translation(0.5, 0, 0.5));
-            box.apply(new Rotation((-90 * (chest.rotation)) * MathHelper.torad, Vector3.Y_POS).at(new Vector3(0.5, 0, 0.5)));
+            // Chest local centers (pre-rotation), top surface ~14/16
+            double y = 14D / 16D + 0.001D;
+            double x = slotIndex == 0 ? -3D / 16D : (slotIndex == 1 ? 3D / 16D : 0D);
+            double z = slotIndex == 2 ? 2D / 16D : -2D / 16D;
+            // Move to center, rotate around center according to chest.rotation
+            box.apply(new codechicken.lib.vec.Translation(0.5 + x, y, 0.5 + z));
+            box.apply(new Rotation((-90 * (chest.rotation)) * MathHelper.torad, Vector3.Y_POS).at(new Vector3(0.5, y, 0.5)));
         } else if (be instanceof TileEnderTank tank) {
-            Transformation t = BlockEnderTank.buttonT[slotIndex];
-            box.apply(t);
-            Transformation r = Rotation.quarterRotations[tank.rotation ^ 2].at(CENTER);
-            box.apply(r);
+            // Tank uses absolute local coords, then rotates around (0.5,0,0.5)
+            double y = 0.91 + 0.001;
+            double cx = (slotIndex == 0 ? 0.40 : (slotIndex == 1 ? 0.60 : 0.50));
+            double cz = (slotIndex == 2 ? 0.58 : 0.42);
+            // Translate to rotation origin, rotate, then translate to final position
+            // Build relative vector (from 0.5, y, 0.5)
+            Vector3 rel = new Vector3(cx - 0.5, 0, cz - 0.5);
+            Transformation rot = Rotation.quarterRotations[tank.rotation ^ 2].at(CENTER);
+            rel.apply(rot);
+            box.apply(new codechicken.lib.vec.Translation(0.5 + rel.x, y, 0.5 + rel.z));
         } else {
             return;
         }

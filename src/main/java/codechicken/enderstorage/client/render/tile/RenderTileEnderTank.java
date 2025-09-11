@@ -96,8 +96,8 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
             pose.translate(x - 0.5, y, z - 0.5);
             // Lay item flat
             pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
-            // 缩放更小，使其不超过正方形高亮区域（约 0.12）
-            pose.scale(0.12F, 0.12F, 0.12F);
+            // 使用常量控制槽位中物品缩放
+            pose.scale(codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE);
             // 使用槽位所在位置的光照，修复 3D 物品光照
             int itemLight = ccrs.brightness;
             if (level != null && pos != null) {

@@ -61,7 +61,7 @@ public class TankLayerRenderer extends RenderLayer<AbstractClientPlayer, PlayerM
             mat.rotate(netHeadYaw * MathHelper.torad, Vector3.Y_NEG);
             mat.rotate(headPitch * MathHelper.torad, Vector3.X_POS);
             mat.translate(-0.5, 1, -0.5);
-            RenderTileEnderTank.renderTank(ccrs, mat, mStack, buffers, 0, (float) (MathHelper.torad * 90F), BLANK, 0, net.minecraft.client.Minecraft.getInstance().level);
+            RenderTileEnderTank.renderTank(ccrs, mat, mStack, buffers, 0, (float) (MathHelper.torad * 90F), BLANK, 0, net.minecraft.client.Minecraft.getInstance().level, null);
 
             FluidStack stack = FluidUtils.water.copy();
             float bob = 0.45F + RenderUtils.getPearlBob(ClientUtils.getRenderTime()) * 2;

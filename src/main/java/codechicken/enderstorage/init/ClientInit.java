@@ -3,6 +3,7 @@ package codechicken.enderstorage.init;
 import codechicken.enderstorage.api.Frequency;
 import codechicken.enderstorage.client.Shaders;
 import codechicken.enderstorage.client.gui.GuiEnderItemStorage;
+import codechicken.enderstorage.client.SlotHighlightHandler;
 import codechicken.enderstorage.client.render.entity.TankLayerRenderer;
 import codechicken.enderstorage.client.render.tile.RenderTileEnderChest;
 import codechicken.enderstorage.client.render.tile.RenderTileEnderTank;
@@ -39,6 +40,8 @@ public class ClientInit {
         bus.addListener(ClientInit::onAddRenderLayers);
         bus.addListener(ClientInit::onClientSetupEvent);
         Shaders.init();
+        // Runtime events from Forge bus.
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.addListener(SlotHighlightHandler::onRenderHighlight);
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

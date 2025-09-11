@@ -128,8 +128,8 @@ public class RenderTileEnderChest implements BlockEntityRenderer<TileEnderChest>
             pose.translate(x, y, z);
             // Lay item flat on lid
             pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
-            // 缩放为原来的 1/3
-            pose.scale(0.33333334F, 0.33333334F, 0.33333334F);
+            // 缩放更小，使其不超过正方形高亮区域（约 0.12）
+            pose.scale(0.12F, 0.12F, 0.12F);
             // 使用槽位所在位置的光照，修复 3D 物品光照
             int itemLight = ccrs.brightness;
             if (level != null && pos != null) {

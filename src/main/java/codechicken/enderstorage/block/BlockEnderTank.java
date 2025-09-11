@@ -51,7 +51,7 @@ public class BlockEnderTank extends BlockEnderStorage {
             Transformation rotation = Rotation.quarterRotations[idx].at(CENTER);
             for (int button = 0; button < 3; button++) {
                 BUTTONS[rot][button] = new IndexedVoxelShape(
-                        VoxelShapeCache.getShape(TileFrequencyOwner.SELECTION_BUTTON.copy().apply(buttonT[button]).apply(rotation)),
+                        VoxelShapeCache.getShape(TileFrequencyOwner.TANK_SELECTION_BUTTON.copy().apply(buttonT[button]).apply(rotation)),
                         button + 1
                 );
             }

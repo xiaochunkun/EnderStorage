@@ -64,9 +64,17 @@ public class SlotHighlightHandler {
         }
 
         // Build the hovered slot's cuboid in world space.
-        // Base square box from constants (bottom anchored like VoxelShape definitions).
-        double hh = TileFrequencyOwner.SLOT_HALF;
-        Cuboid6 box = new Cuboid6(-hh, 0, -hh, hh, TileFrequencyOwner.SLOT_HEIGHT, hh);
+        // Base square box per block type (bottom anchored like VoxelShape definitions).
+        double hh;
+        double hY;
+        if (be instanceof TileEnderChest) {
+            hh = TileFrequencyOwner.CHEST_SLOT_HALF;
+            hY = TileFrequencyOwner.CHEST_SLOT_HEIGHT;
+        } else {
+            hh = TileFrequencyOwner.TANK_SLOT_HALF;
+            hY = TileFrequencyOwner.TANK_SLOT_HEIGHT;
+        }
+        Cuboid6 box = new Cuboid6(-hh, 0, -hh, hh, hY, hh);
 
         if (be instanceof TileEnderChest chest) {
             // Chest local bottom Y on top surface ~14/16

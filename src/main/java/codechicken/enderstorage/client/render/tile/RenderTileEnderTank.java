@@ -73,12 +73,8 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
         Matrix4 valveMat = mat.copy().apply(new Rotation(valveRot, Vector3.Z_POS).at(new Vector3(0, 0.4165, 0)));
         valveModel.render(ccrs, valveMat);
 
-        // 顶部槽位：以物品显示，不再使用按钮纹理
+        // 顶部槽位物品：直接按照旋转后的局部中心坐标进行平移（不再整体旋转 PoseStack），与高亮/命中保持一致
         pose.pushPose();
-        // Align with 'mat' transforms: mat currently has translated(0.5,0,0.5) and rotated around Y
-        // Recreate similar transform for ItemRenderer
-        pose.translate(0.5, 0, 0.5);
-        pose.mulPose(new Quaternionf().rotateXYZ(0, (float) ((-90 * (rotation + 2)) * MathHelper.torad), 0));
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         for (int i = 0; i < 3; i++) {
             // 三角布局：0=左上，1=右上，2=中下（绝对坐标，随后减去 0.5 进入局部）
@@ -93,11 +89,21 @@ public class RenderTileEnderTank implements BlockEntityRenderer<TileEnderTank> {
                 x = 0.50; z = 0.58;
             }
             pose.pushPose();
-            pose.translate(x - 0.5, y, z - 0.5);
+            // 旋转坐标以匹配渲染朝向：-90° * (rotation + 2)
+            double rx = x - 0.5;
+            double rz = z - 0.5;
+            int k = (rotation + 2) & 3;
+            switch (k) {
+                case 0 -> {}
+                case 1 -> { double nx = rz; rz = -rx; rx = nx; }
+                case 2 -> { rx = -rx; rz = -rz; }
+                case 3 -> { double nx = -rz; rz = rx; rx = nx; }
+            }
+            pose.translate(0.5 + rx, y, 0.5 + rz);
             // Lay item flat
             pose.mulPose(new Quaternionf().rotateXYZ((float) (-90F * MathHelper.torad), 0, 0));
-            // 使用常量控制槽位中物品缩放
-            pose.scale(codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.SLOT_ITEM_SCALE);
+            // 使用 Tank 常量控制槽位中物品缩放
+            pose.scale(codechicken.enderstorage.tile.TileFrequencyOwner.TANK_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.TANK_ITEM_SCALE, codechicken.enderstorage.tile.TileFrequencyOwner.TANK_ITEM_SCALE);
             // 使用槽位所在位置的光照，修复 3D 物品光照
             int itemLight = ccrs.brightness;
             if (level != null && pos != null) {

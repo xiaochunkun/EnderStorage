@@ -44,7 +44,7 @@ public class BlockEnderChest extends BlockEnderStorage {
         for (int rot = 0; rot < 4; rot++) {
             //Build buttons and latch.
             for (int button = 0; button < 3; button++) {
-                Cuboid6 cuboid = TileFrequencyOwner.SELECTION_BUTTON.copy();
+                Cuboid6 cuboid = TileFrequencyOwner.CHEST_SELECTION_BUTTON.copy();
                 cuboid.apply(buttonT[button]);
                 cuboid.apply(new Translation(0.5, 0, 0.5));
                 cuboid.apply(new Rotation((-90 * (rot)) * MathHelper.torad, Vector3.Y_POS).at(new Vector3(0.5, 0, 0.5)));

@@ -21,14 +21,17 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class TileFrequencyOwner extends BlockEntity {
 
-    // 槽位高亮/命中区域尺寸常量，可调大/调小（单位：方块）
-    // 调整槽位正方形显示大小（命中/高亮/显示共用）
-    public static final double SLOT_HALF = 2D / 16D; // X/Z 半径（默认宽 6/16）
-    public static final double SLOT_HEIGHT = 1D / 16D; // Y 高度
-    // 槽位中 3D 物品的缩放（约等于方块比例，1.0 = 1方块）
-    public static final float SLOT_ITEM_SCALE = 0.25F;
-    // 槽位选取盒：正方形（X/Z 同为 2*SLOT_HALF）
-    public static final Cuboid6 SELECTION_BUTTON = new Cuboid6(-SLOT_HALF, 0, -SLOT_HALF, SLOT_HALF, SLOT_HEIGHT, SLOT_HALF);
+    // Chest 尺寸（较大）
+    public static final double CHEST_SLOT_HALF = 3D / 16D; // 半径（宽 6/16）
+    public static final double CHEST_SLOT_HEIGHT = 1D / 16D;
+    public static final float CHEST_ITEM_SCALE = 0.18F;
+    // Tank 尺寸（较小）
+    public static final double TANK_SLOT_HALF = 2.5D / 16D; // 半径（宽 5/16）
+    public static final double TANK_SLOT_HEIGHT = 1D / 16D;
+    public static final float TANK_ITEM_SCALE = 0.16F;
+    // 槽位选取盒：正方形（Chest / Tank 区分）
+    public static final Cuboid6 CHEST_SELECTION_BUTTON = new Cuboid6(-CHEST_SLOT_HALF, 0, -CHEST_SLOT_HALF, CHEST_SLOT_HALF, CHEST_SLOT_HEIGHT, CHEST_SLOT_HALF);
+    public static final Cuboid6 TANK_SELECTION_BUTTON = new Cuboid6(-TANK_SLOT_HALF, 0, -TANK_SLOT_HALF, TANK_SLOT_HALF, TANK_SLOT_HEIGHT, TANK_SLOT_HALF);
 
     protected Frequency frequency = new Frequency();
     private int changeCount;

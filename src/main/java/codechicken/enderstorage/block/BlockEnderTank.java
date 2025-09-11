@@ -46,9 +46,8 @@ public class BlockEnderTank extends BlockEnderStorage {
 
         Cuboid6 dialBase = new Cuboid6(0.358, 0.268, 0.05, 0.662, 0.565, 0.15);
         for (int rot = 0; rot < 4; rot++) {
-            // 与渲染一致：-90° * (rotation + 2) -> quarterRotations[(-rot - 2) & 3]
-            int idx = (-rot - 2) & 3;
-            Transformation rotation = Rotation.quarterRotations[idx].at(CENTER);
+            // 与渲染一致：使用 rot ^ 2 的四分旋转（对应 -90°*(rot+2)）
+            Transformation rotation = Rotation.quarterRotations[rot ^ 2].at(CENTER);
             for (int button = 0; button < 3; button++) {
                 BUTTONS[rot][button] = new IndexedVoxelShape(
                         VoxelShapeCache.getShape(TileFrequencyOwner.TANK_SELECTION_BUTTON.copy().apply(buttonT[button]).apply(rotation)),
